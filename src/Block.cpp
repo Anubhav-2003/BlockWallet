@@ -25,7 +25,7 @@ std::string Block::calcHash() const {
     std::stringstream ss;
     ss << std::put_time(std::gmtime(&timeStamp), "%Y-%m-%dT%H:%M:%S");
     for (const auto &t : txs) {
-        ss << t.sender << t.receiver << t.amount;
+        ss << t.from << t.to << t.value;
     }
     ss << prev << nonce;
     return sha256(ss.str());

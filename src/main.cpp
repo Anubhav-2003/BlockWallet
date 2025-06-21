@@ -11,9 +11,9 @@ int main() {
     Wallet bobWallet("Bob");
     Wallet charlieWallet("Charlie");
 
-    aliceWallet.balance = 100;
-    bobWallet.balance = 100;
-    charlieWallet.balance = 0;
+    aliceWallet.bal = 100;
+    bobWallet.bal = 100;
+    charlieWallet.bal = 0;
 
     accountList.push_back(&aliceWallet);
     accountList.push_back(&bobWallet);
@@ -22,23 +22,23 @@ int main() {
     Transaction paymentOne = aliceWallet.sendFunds(bobWallet, 50);
     Transaction paymentTwo = bobWallet.sendFunds(charlieWallet, 30);
 
-    ledger.createTransaction(paymentOne);
-    ledger.createTransaction(paymentTwo);
+    ledger.addTransaction(paymentOne);
+    ledger.addTransaction(paymentTwo);
 
     ledger.minePendingTransactions();
 
-    ledger.notifyWallets(accountList);
+    ledger.updateWallets(accountList);
 
-    if (ledger.isChainValid()) {
+    if (ledger.verifyBlockchain()) {
         std::cout << "Blockchain is valid.\n";
     } else {
         std::cout << "Blockchain is not valid!\n";
     }
 
-    ledger.printChain();
+    ledger.displayBlockchain();
 
     for (const auto& account : accountList) {
-        std::cout << "Wallet " << account->id << " has balance: " << account->balance << std::endl;
+        std::cout << "Wallet " << account->name << " has balance: " << account->bal << std::endl;
     }
 
     return 0;

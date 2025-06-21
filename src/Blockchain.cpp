@@ -12,17 +12,17 @@ void Blockchain::addTransaction(Transaction newTransaction) {
 }
 
 void Blockchain::minePendingTransactions() {
-    Block minedBlock(transactionPool, blockChain.back().blockHash, 2);
+    Block minedBlock(transactionPool, blockChain.back().hash, 2);
     blockChain.push_back(minedBlock);
     transactionPool.clear();
 }
 
 bool Blockchain::verifyBlockHash(const Block& currentBlock) {
-    return currentBlock.blockHash == currentBlock.generateHash();
+    return currentBlock.hash == currentBlock.calcHash();
 }
 
 bool Blockchain::verifyTransaction(const Transaction& transaction) {
-    return transaction.amount > 0;
+    return transaction.value > 0;
 }
 
 bool Blockchain::verifyBlockchain() {
@@ -34,12 +34,12 @@ bool Blockchain::verifyBlockchain() {
             return false;
         }
 
-        if (currentBlock.prevHash != previousBlock.blockHash) {
+        if (currentBlock.prev != previousBlock.hash) {
             return false;
         }
 
-        for (const auto& transaction : currentBlock.transactions) {
-            RSA* senderKey = keyDirectory[transaction.sender];
+        for (const auto& transaction : currentBlock.txs) {
+            RSA* senderKey = keyDirectory[transaction.from];
             if (!transaction.isValid(senderKey)) {
                 return false;
             }
@@ -50,14 +50,14 @@ bool Blockchain::verifyBlockchain() {
 
 void Blockchain::displayBlockchain() {
     for (const auto& block : blockChain) {
-        std::cout << "Block Timestamp: " << block.timestamp << std::endl;
-        std::cout << "Previous Hash: " << block.prevHash << std::endl;
-        std::cout << "Block Hash: " << block.blockHash << std::endl;
+        std::cout << "Block Timestamp: " << block.timeStamp << std::endl;
+        std::cout << "Previous Hash: " << block.prev << std::endl;
+        std::cout << "Block Hash: " << block.hash << std::endl;
         std::cout << "Transactions:" << std::endl;
-        for (const auto& transaction : block.transactions) {
-            std::cout << "  Sender: " << transaction.sender
-                      << " Receiver: " << transaction.receiver
-                      << " Amount: " << transaction.amount << std::endl;
+        for (const auto& transaction : block.txs) {
+            std::cout << "  Sender: " << transaction.from
+                      << " Receiver: " << transaction.to
+                      << " Amount: " << transaction.value << std::endl;
         }
         std::cout << "Nonce: " << block.nonce << std::endl << std::endl;
     }
@@ -65,9 +65,9 @@ void Blockchain::displayBlockchain() {
 
 void Blockchain::updateWallets(std::vector<Wallet*>& walletList) {
     for (auto& wallet : walletList) {
-        keyDirectory[wallet->id] = wallet->publicKey;
+        keyDirectory[wallet->name] = wallet->pubKey;
         for (auto& block : blockChain) {
-            wallet->updateBalance(block.transactions);
+            wallet->updateBalance(block.txs);
         }
     }
 }
